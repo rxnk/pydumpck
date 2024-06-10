@@ -1,4 +1,4 @@
-from . import logger
+
 import argparse
 from typing import List
 import pydumpck.__version__ as __version__
@@ -90,15 +90,6 @@ def run():
     )
 
     parser.add_argument(
-        '-l',
-        '--logger',
-        default=False,
-        nargs=argparse.OPTIONAL,
-        type=bool,
-        dest='disable_log',
-        help='disable file and console log',
-    )
-    parser.add_argument(
         '-p',
         '--plugin',
         default=['pycdc'],
@@ -107,17 +98,14 @@ def run():
         help='enable decompiler plugins,split by space .example: `--plugin pycdc uncompyle6` (default: %(default)s).available:pycdc,uncompyle6',
     )
     args = parser.parse_args()
-    if not args.disable_log == False:
-        import sgtpyutils.logger
-        sgtpyutils.logger.disable()
-
     if not args.show_version == False:
         v = __version__.__version__
-        logger.debug(v)
+        print(v)
         return v
+
     desc = parser.description + '\n' + '-' * 20
     content = f'pydumpck initilizing with {__version__.__version__}'
-    logger.info(f'{desc}\n{content}')
+    print(f'{desc}\n{content}')
     try:
         dmp = CommonDump()
         return dmp.main(**vars(args))

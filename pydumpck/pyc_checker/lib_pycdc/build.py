@@ -1,4 +1,4 @@
-from .. import logger
+
 from typing import Tuple
 import zipfile
 import os
@@ -48,21 +48,21 @@ def build(move_to: str = None) -> Tuple:
     if build_cache:
         g_lock.release()
         return build_cache, False
-    logger.debug('no cache exist , start build')
+    print('no cache exist , start build')
     export_file = f'{__build()}{os.path.sep}pycdc'
     if move_to:
         build_cache = move_to
     else:
         build_cache = os.path.join(get_self_path(), 'pycdc_cache')
-    logger.debug(f'moving pycdc file {export_file} , has cache:{build_cache}')
+    print(f'moving pycdc file {export_file} , has cache:{build_cache}')
     try:
         shutil.move(export_file, build_cache)
         clear()
         os.chmod(build_cache, 0o100777)
     except Exception as e:
-        logger.error(f'error on migrating..{e}')
+        print(f'error on migrating..{e}')
     g_lock.release()
-    logger.debug('completed built')
+    print('completed built')
     return build_cache, True
 
 

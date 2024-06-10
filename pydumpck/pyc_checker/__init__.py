@@ -1,4 +1,4 @@
-from .. import configuration, logger
+from .. import configuration
 from . import extensions, lib_pycdc, lib_uncompyle6
 from .pyc import default_pyc, PycHandler
 import os
@@ -52,22 +52,22 @@ def exec_pycdc(structed_pyc_file: str, target_file: str, timeout: int = 10):
         err, warning = split_warning_error(p.stderr.decode('utf-8'))
         if warning:
             msg = f'\n{warning}\non exec_pycdc:{structed_pyc_file}'
-            logger.warning(msg)
+            printing(msg)
         if not err:
             err = None
         code_content = remove_pycdc_banner(content)
         result = (code_content, err)
         if content:
             msg = f'decompile bytecode by pycdc success on file:{target_file},length:{len(code_content)}'
-            logger.info(msg)
+            print(msg)
             with open(extensions.get_pycdc_path(target_file), 'wb') as f:
                 f.write(code_content.encode('utf-8'))
         else:
             msg = f'decompile bytecode by pycdc fail,file:{target_file},with error:{err}'
-            logger.warning(msg)
+            printing(msg)
         return result
     except Exception as e:
-        logger.warning(
+        printing(
             f'decompile bytecode by pycdc fail,file:{target_file},with error:{e}')
         return (None, e)
 
@@ -84,11 +84,11 @@ def exec_uncompyle6(structed_pyc_file: str, target_file: str, timeout: int = 10)
             pyc_file=structed_pyc_file,
             target_file=f'{target_file}.up6.py')
         r = remove_pyuncompyle6_banner(r)
-        logger.info(
+        print(
             f'decompile bytecode by uncompyle6 success file:{target_file},length:{len(r)}')
         return (r, None)
     except Exception as e:
-        logger.error(
+        print(
             f'decompile bytecode by uncompyle6 fail file:{target_file} ,with error :{e}')
         return (None, e)
 

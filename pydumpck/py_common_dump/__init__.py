@@ -1,4 +1,4 @@
-from .. import logger
+
 import math
 import os
 import shutil
@@ -11,8 +11,6 @@ from PyInstaller.utils.cliutils.archive_viewer import ArchiveViewer
 
 import sys
 from PyInstaller.archive.readers import CArchiveReader, ZlibArchiveReader, ArchiveReadError
-from sgtpyutils.logger import logger
-from sgtpyutils.database.filebase_database import Database
 
 
 def get_archive(filename: str):
@@ -25,11 +23,11 @@ def get_archive(filename: str):
     try:
         arch = viewer._open_toplevel_archive(filename)
     except ArchiveReadError as ex:
-        logger.error(
+        print(
             f'{msg}make sure your file is a valid archive-python file instead of orgin-exe or others.{ex}')
         sys.exit(-10010)
     except Exception as ex:
-        logger.error(f'{msg}{ex}')
+        print(f'{msg}{ex}')
         sys.exit(-10011)
     return arch
     archive_name = os.path.basename(viewer.filename)
@@ -50,7 +48,7 @@ def get_archive(filename: str):
                     try:
                         embedded_archive = archive.open_embedded_archive(name)
                     except Exception as e:
-                        logger.warn(
+                        print(
                             f"Could not open embedded archive {name!r}: {e}")
                     viewer.stack.append((name, embedded_archive))
     setattr(viewer, 'toc', toc)
@@ -105,7 +103,7 @@ class CommonDump():
         return f'unkonwn file-type:{target_file}'
 
     def handle_nofile(self, target_file: str):
-        logger.error(f'is an invalid file name! {target_file}')
+        print(f'is an invalid file name! {target_file}')
         return -1
 
     @staticmethod
@@ -115,7 +113,7 @@ class CommonDump():
             return
         if configuration.thread_output_directory_customed:
             return
-        logger.info(f'removing output_directory:{target}')
+        print(f'removing output_directory:{target}')
         shutil.rmtree(target)
 
     @staticmethod
@@ -150,7 +148,7 @@ class CommonDump():
             n = f'{p_prefix}{p}'
             if n not in configuration.__dict__:
                 self.any_invalid_plugin = True
-                logger.error(f'no plugin named {p}')
+                print(f'no plugin named {p}')
                 return None
             return [p, n]
         plugin = [filter_plugin(x) for x in plugin]
@@ -160,24 +158,21 @@ class CommonDump():
             all_valid_plugins = filter(lambda x: x.startswith(p_prefix), keys)
             all_valid_plugins = [x.replace(p_prefix, '')
                                  for x in all_valid_plugins]
-            logger.debug(f'all valid plugins:{all_valid_plugins}')
+            print(f'all valid plugins:{all_valid_plugins}')
             time.sleep(5)
-        logger.debug(f'plugins loaded with {[x[0] for x in plugin if x]}')
+        print(f'plugins loaded with {[x[0] for x in plugin if x]}')
         [setattr(configuration, x, True) for x in plugin_paths]
 
         if configuration.plugin_decompiler_enable_uncompyle6 and configuration.decompile_file == None:
-            logger.error(
+            print(
                 'attention! when use uncompyle6 , you should use --decompile_file specified which file to decompile for faster task.')
             time.sleep(3)
 
     def statistics_status(self, is_end: bool = False):
-        from sgtpyutils import timer
         if is_end:
-            t = self.global_start_time
-            logger.info(
+            print(
                 f'completed,cost {math.ceil(t.spent * 1000)}ms with result:{self.result}')
             return
-        self.global_start_time = timer.create_timer()
 
     def main(self, target_file: str, output_directory: str, thread: int = 0, timeout: int = 10, target_file_type: str = None, session_timeout: int = 120, plugin: List = [], decompile_file: List = None, struct_headers: str = None, **args):
         self.statistics_status()
@@ -201,16 +196,16 @@ class CommonDump():
             zip(decompile_file, [True for x in decompile_file])) if decompile_file else None
         self.load_plugins(plugin)
         if not target_file:
-            logger.error('target_file is required')
+            print('target_file is required')
             return
-        logger.debug(f'target file input:{target_file}\nto:{output_directory}')
+        print(f'target file input:{target_file}\nto:{output_directory}')
         if not os.path.exists(target_file):
-            logger.error('target_file not exist')
+            print('target_file not exist')
 
         file_type = target_file_type or self.get_filetype(target_file)
         dispatch_to = self.action_map.get(file_type, None)
 
-        logger.debug(f'start dump target file. type:{dispatch_to}')
+        print(f'start dump target file. type:{dispatch_to}')
         if dispatch_to != FileTypeFlag.FLAG_NOTFILE:
             abs_path = os.path.abspath(target_file)
             target_dir = os.path.dirname(abs_path)

@@ -1,4 +1,4 @@
-from .. import logger
+
 from typing import List
 from io import BufferedReader
 import os
@@ -45,7 +45,7 @@ def _handle_file(f: BufferedReader, dirName: str, cipper_key: bytes):
 
     # Skip PYZ extraction if not running under the same python version
     if pyc_magic != pycHeader:
-        logger.error('Warning: This script is running in a different Python version than the one used to build the executable.')
+        print('Warning: This script is running in a different Python version than the one used to build the executable.')
 
     (tocPosition, ) = struct.unpack('!i', f.read(4))
     f.seek(tocPosition, os.SEEK_SET)
@@ -53,11 +53,11 @@ def _handle_file(f: BufferedReader, dirName: str, cipper_key: bytes):
     try:
         toc = marshal.load(f)
     except:
-        logger.warning(
+        printing(
             'Unmarshalling FAILED. Cannot extract {0}. Extracting remaining files.'.format(dirName))
         return
 
-    logger.info('Found {0} files in PYZ archive'.format(len(toc)))
+    print('Found {0} files in PYZ archive'.format(len(toc)))
 
     # From pyinstaller 3.1+ toc is a list of tuples
     if type(toc) == list:

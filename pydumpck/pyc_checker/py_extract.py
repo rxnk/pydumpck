@@ -64,7 +64,7 @@ Version 2.0 (March 26, 2020)
 - Added support for Python 3.7, 3.8
 - The header of all extracted pyc's are now automatically fixed
 """
-from .. import logger
+
 from __future__ import print_function
 import os
 import struct
@@ -105,7 +105,7 @@ class PyInstArchive:
             self.fPtr = open(self.filePath, 'rb')
             self.fileSize = os.stat(self.filePath).st_size
         except:
-            logger.error('Error: Could not open {0}'.format(self.filePath))
+            print('Error: Could not open {0}'.format(self.filePath))
             return False
         return True
 
@@ -116,14 +116,14 @@ class PyInstArchive:
             pass
 
     def checkFile(self):
-        logger.info('Processing {0}'.format(self.filePath))
+        print('Processing {0}'.format(self.filePath))
 
         searchChunkSize = 8192
         endPos = self.fileSize
         self.cookiePos = -1
 
         if endPos < len(self.MAGIC):
-            logger.error('Error : File is too short or truncated')
+            print('Error : File is too short or truncated')
             return False
 
         while True:
@@ -148,18 +148,18 @@ class PyInstArchive:
                 break
 
         if self.cookiePos == -1:
-            logger.error(
+            print(
                 'Error : Missing cookie, unsupported pyinstaller version or not a pyinstaller archive')
             return False
 
         self.fPtr.seek(self.cookiePos + self.PYINST20_COOKIE_SIZE, os.SEEK_SET)
 
         if b'python' in self.fPtr.read(64):
-            logger.info('Pyinstaller version: 2.1+')
+            print('Pyinstaller version: 2.1+')
             self.pyinstVer = 21     # pyinstaller 2.1+
         else:
             self.pyinstVer = 20     # pyinstaller 2.0
-            logger.info('Pyinstaller version: 2.0')
+            print('Pyinstaller version: 2.0')
 
         return True
 
@@ -182,10 +182,10 @@ class PyInstArchive:
                         self.PYINST21_COOKIE_SIZE))
 
         except:
-            logger.error('Error : The file is not a pyinstaller archive')
+            print('Error : The file is not a pyinstaller archive')
             return False
 
-        logger.info('Python version: {0}'.format(self.pyver))
+        print('Python version: {0}'.format(self.pyver))
 
         # Additional data after the cookie
         tailBytes = self.fileSize - self.cookiePos - \
@@ -198,7 +198,7 @@ class PyInstArchive:
         self.tableOfContentsPos = self.overlayPos + toc
         self.tableOfContentsSize = tocLen
 
-        logger.info('Length of package: {0} bytes'.format(lengthofPackage))
+        print('Length of package: {0} bytes'.format(lengthofPackage))
         return True
 
     def parseTOC(self):
@@ -221,7 +221,7 @@ class PyInstArchive:
             name = name.decode('utf-8').rstrip('\0')
             if len(name) == 0:
                 name = str(uniquename())
-                logger.error(
+                print(
                     'Warning: Found an unamed file in CArchive. Using random name {0}'.format(name))
 
             self.tocList.append(
@@ -235,7 +235,7 @@ class PyInstArchive:
                 ))
 
             parsedLen += entrySize
-        logger.info('Found {0} files in CArchive'.format(len(self.tocList)))
+        print('Found {0} files in CArchive'.format(len(self.tocList)))
 
     def _writeRawData(self, filepath, data):
         nm = filepath.replace('\\', os.path.sep).replace(
@@ -249,7 +249,7 @@ class PyInstArchive:
             f.write(data)
 
     def extractFiles(self):
-        logger.info('Beginning extraction...please standby')
+        print('Beginning extraction...please standby')
         extractionDir = os.path.join(
             os.getcwd(), os.path.basename(self.filePath) + '_extracted')
 
@@ -283,7 +283,7 @@ class PyInstArchive:
             if entry.typeCmprsData == b's':
                 # s -> ARCHIVE_ITEM_PYSOURCE
                 # Entry point are expected to be python scripts
-                logger.info('Possible entry point: {0}.pyc'.format(entry.name))
+                print('Possible entry point: {0}.pyc'.format(entry.name))
                 self._writePyc(entry.name + '.pyc', data)
 
             elif entry.typeCmprsData == b'M' or entry.typeCmprsData == b'm':
@@ -328,11 +328,11 @@ class PyInstArchive:
 
             # Skip PYZ extraction if not running under the same python version
             if pyc_magic != pycHeader:
-                logger.error(
+                print(
                     'Warning: This script is running in a different Python version than the one used to build the executable.')
-                logger.error(
+                print(
                     'Please run this script in Python{0} to prevent extraction errors during unmarshalling'.format(self.pyver))
-                logger.error('Skipping pyz extraction')
+                print('Skipping pyz extraction')
                 return
 
             (tocPosition, ) = struct.unpack('!i', f.read(4))
@@ -341,11 +341,11 @@ class PyInstArchive:
             try:
                 toc = marshal.load(f)
             except:
-                logger.error(
+                print(
                     'Unmarshalling FAILED. Cannot extract {0}. Extracting remaining files.'.format(name))
                 return
 
-            logger.info('Found {0} files in PYZ archive'.format(len(toc)))
+            print('Found {0} files in PYZ archive'.format(len(toc)))
 
             # From pyinstaller 3.1+ toc is a list of tuples
             if type(toc) == list:
@@ -380,7 +380,7 @@ class PyInstArchive:
                     data = f.read(length)
                     data = zlib.decompress(data)
                 except:
-                    logger.error(
+                    print(
                         'Error: Failed to decompress {0}, probably encrypted. Extracting as is.'.format(filePath))
                     open(filePath + '.encrypted', 'wb').write(data)
                 else:
@@ -389,7 +389,7 @@ class PyInstArchive:
 
 def main():
     if len(sys.argv) < 2:
-        logger.info('Usage: pyinstxtractor.py <filename>')
+        print('Usage: pyinstxtractor.py <filename>')
 
     else:
         arch = PyInstArchive(sys.argv[1])
@@ -401,7 +401,7 @@ def main():
                     arch.close()
                     msg1 = 'Successfully extracted pyinstaller archive: '
                     msg = 'You can now use a python decompiler on the pyc files within the extracted directory'
-                    logger.info(f'{msg1}{sys.argv[1]}\n{msg}')
+                    print(f'{msg1}{sys.argv[1]}\n{msg}')
                     return
 
             arch.close()

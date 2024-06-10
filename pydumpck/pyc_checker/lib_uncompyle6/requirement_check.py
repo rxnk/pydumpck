@@ -1,4 +1,3 @@
-from ... import logger
 
 
 def check(v_expected: str, v_current: str) -> bool:
@@ -18,7 +17,7 @@ def check_version():
 
     fit, exp, cur = check(v_expected, v_current)
     if not fit:
-        logger.warning(
+        printing(
             f'require xdis version greater than {v_expected},current is {v_current}')
         if input('install package online? yes(*)/no(n)') == 'n':
             import sys

@@ -1,7 +1,7 @@
 
 import xdis.unmarshal
 from typing import List, Tuple
-from .. import logger
+
 from ...configuration.res_lock import check_directory
 from . import headers, magic_code
 import os
@@ -38,7 +38,7 @@ class PycHandler():
             fp.seek(0)
         if success_version_mode:
             v, magic, demo_header = success_version_mode
-            logger.info(f'find suitable python-version:{v},magic:{magic}')
+            print(f'find suitable python-version:{v},magic:{magic}')
             return bytes(demo_header)
         return None
 

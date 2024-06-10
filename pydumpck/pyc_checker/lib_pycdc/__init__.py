@@ -1,4 +1,3 @@
-from ... import logger
 import os
 import shutil
 import time
@@ -18,15 +17,15 @@ def use_pycdc():
     else:
         pycdc_file = bin_path
         if not os.path.exists(pycdc_file):
-            logger.error('pycdc_file not exist , trying build it...')
+            print('pycdc_file not exist , trying build it...')
             time.sleep(5)
             from . import build
             build_file, build_flag = build.build(pycdc_file)
-            logger.info(f'get compile file path:{build_file},is_build:{build_flag}')
+            print(f'get compile file path:{build_file},is_build:{build_flag}')
                 
 
     if os.stat(pycdc_file).st_mode != 0o100777:
-        logger.debug(f'detect pycdc_file not executable,try auth:{pycdc_file}')
+        print(f'detect pycdc_file not executable,try auth:{pycdc_file}')
         os.chmod(pycdc_file, 0o100777)
     if not os.path.isfile(pycdc_file):
         raise Exception(f'required binary file is not exist:{pycdc_file}')
