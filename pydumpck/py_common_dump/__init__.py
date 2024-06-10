@@ -170,9 +170,7 @@ class CommonDump():
 
     def statistics_status(self, is_end: bool = False):
         if is_end:
-            print(
-                f'completed,cost {math.ceil(t.spent * 1000)}ms with result:{self.result}')
-            return
+            print("completed, check output_*")
 
     def main(self, target_file: str, output_directory: str, thread: int = 0, timeout: int = 10, target_file_type: str = None, session_timeout: int = 120, plugin: List = [], decompile_file: List = None, struct_headers: str = None, **args):
         self.statistics_status()
